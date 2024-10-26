@@ -185,8 +185,6 @@ onMounted(() => {
   }
 });
 
-
-
 const scrollPrev = () => {
   if (emblaApi.value) emblaApi.value.scrollPrev();
 };
@@ -202,15 +200,22 @@ const scrollNext = () => {
       <div class="embla__viewport" ref="emblaRef">
         <div class="embla__container">
           <div v-for="item in storys" :key="item.page" class="embla__slide">
-            <div class="slide-content">
-              <section class="image-section">
+            <div class="slide-content" :class="{ 'center-content': item.page === 1 }">
+              <section class="image-section" :class="{ 'center-image': item.page === 1 }">
                 <img
+                  v-if="item.page === 1"
                   class="image"
                   :src="`/img/Kate and Ken Three Bears page${item.page}.png`"
                   alt=""
                 />
+                <img
+                v-if="item.page !== 1"
+                  class="image-book"
+                  :src="`/img/Kate and Ken Three Bears page${item.page}.png`"
+                  alt=""
+                />
               </section>
-              <section class="text-section">
+              <section v-if="item.page !== 1" class="text-section">
                 <cite class="conversation">
                   <p v-for="text in item.texts" :key="text.conversation">
                     {{ text.conversation }}
@@ -291,7 +296,22 @@ body {
 .image {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+}
+.image-book {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+}
+.center-content {
+  justify-content: center;
+}
+.center-image {
+  flex: 0 0 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  object-fit: contain !important;
 }
 .toggle-button {
   position: fixed;
@@ -356,6 +376,15 @@ body {
   .embla__prev,
   .embla__next {
     padding: 10px;
+    top: auto;
+    bottom: 10px;
+    transform: translateY(0);
+  }
+  .embla__prev {
+    left: 10px;
+  }
+  .embla__next {
+    right: 10px;
   }
 }
 </style>
