@@ -12,7 +12,7 @@ const storys = ref([
     texts: [
       {
         conversation: null,
-        audio: "public/audio/Music - page 1 - Kate and Ken Book Intro.mp3",
+        audio: "/audio/Music - page 1 - Kate and Ken Book Intro.mp3",
       },
     ],
   },
@@ -21,11 +21,11 @@ const storys = ref([
     texts: [
       {
         conversation: "“Hello, I am Kate.”",
-        audio: "public/audio/Music - page 2 - Kate melody.mp3",
+        audio: "/audio/Music - page 2 - Kate melody.mp3",
       },
       {
         conversation: "“Hello, I am Ken.”",
-        audio: "public/audio/Music - page 2 - Ken melody.mp3",
+        audio: "/audio/Music - page 2 - Ken melody.mp3",
       },
       {
         conversation: "“We are good friends.”",
@@ -44,7 +44,7 @@ const storys = ref([
       {
         conversation: `“What a lovely day!” say
                     Kate and Ken.”`,
-        audio: "public/audio/Music - page 3 - Skipping through the woods.mp3",
+        audio: "/audio/Music - page 3 - Skipping through the woods.mp3",
       },
     ],
   },
@@ -57,15 +57,15 @@ const storys = ref([
       },
       {
         conversation: `“Papa Bear`,
-        audio: "public/audio/Music - page 4 - Papa bear melody.mp3",
+        audio: "/audio/Music - page 4 - Papa bear melody.mp3",
       },
       {
         conversation: `Mama Bear`,
-        audio: "public/audio/Music - page 4 - Mama bear melody.mp3",
+        audio: "/audio/Music - page 4 - Mama bear melody.mp3",
       },
       {
         conversation: `and Baby Bear”`,
-        audio: "public/audio/Music - page 4 - Baby bear melody.mp3",
+        audio: "/audio/Music - page 4 - Baby bear melody.mp3",
       },
       
     ],
@@ -78,8 +78,8 @@ const storys = ref([
           It is too hot to eat.
           She pours the porridge into three bowls to cool.
           ”`,
-        audio: "public/audio/Music - page 5 - Peas Porriage Hot song recording.mp3",
-        speaker: "public/icon/listen_speaker.png",
+        audio: "/audio/Music - page 5 - Peas Porriage Hot song recording.mp3",
+        speaker: "/icon/listen_speaker.png",
       },
     ],
   },
@@ -92,8 +92,8 @@ const storys = ref([
                         just nice when we come
                         home,” says Mama Bear.
                         he pours the porridge into three bowls to cool.”`,
-        audio: "public/audio/Music - page 5 - Peas Porriage Hot song.mp3",
-        speaker: "public/icon/listen_speaker.png",
+        audio: "/audio/Music - page 5 - Peas Porriage Hot song.mp3",
+        speaker: "/icon/listen_speaker.png",
       },
       {
         conversation: `“The three bears take a
@@ -206,7 +206,7 @@ const scrollNext = () => {
               <section class="image-section">
                 <img
                   class="image"
-                  :src="`/public/img/Kate and Ken Three Bears page${item.page}.png`"
+                  :src="`//img/Kate and Ken Three Bears page${item.page}.png`"
                   alt=""
                 />
               </section>
@@ -217,14 +217,14 @@ const scrollNext = () => {
                     <img
                       v-if="text.audio"
                       width="30"
-                      src="/public/icon/listen_speaker.png"
+                      src="//icon/listen_speaker.png"
                       alt="Listen"
                       @click="toggleAudio(text.audio)"
                     />
                     <img
                       v-if="text.speaker"
                       width="30"
-                      src="/public/icon/Icon - microphone.png"
+                      src="//icon/Icon - microphone.png"
                       alt="Record"
                       @mousedown="startRecording"
                       @mouseup="stopRecording"
@@ -232,7 +232,7 @@ const scrollNext = () => {
                     <img
                       v-if="recordedAudio"
                       width="30"
-                      src="/public/icon/play_recording.png"
+                      src="//icon/play_recording.png"
                       alt="Play Recording"
                       @click="toggleRecordedAudio"
                     />
