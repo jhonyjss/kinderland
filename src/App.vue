@@ -206,7 +206,7 @@ const scrollNext = () => {
               <section class="image-section">
                 <img
                   class="image"
-                  :src="`//img/Kate and Ken Three Bears page${item.page}.png`"
+                  :src="`/img/Kate and Ken Three Bears page${item.page}.png`"
                   alt=""
                 />
               </section>
@@ -217,14 +217,14 @@ const scrollNext = () => {
                     <img
                       v-if="text.audio"
                       width="30"
-                      src="//icon/listen_speaker.png"
+                      src="/icon/listen_speaker.png"
                       alt="Listen"
                       @click="toggleAudio(text.audio)"
                     />
                     <img
                       v-if="text.speaker"
                       width="30"
-                      src="//icon/Icon - microphone.png"
+                      src="/icon/Icon - microphone.png"
                       alt="Record"
                       @mousedown="startRecording"
                       @mouseup="stopRecording"
@@ -232,7 +232,7 @@ const scrollNext = () => {
                     <img
                       v-if="recordedAudio"
                       width="30"
-                      src="//icon/play_recording.png"
+                      src="/icon/play_recording.png"
                       alt="Play Recording"
                       @click="toggleRecordedAudio"
                     />
