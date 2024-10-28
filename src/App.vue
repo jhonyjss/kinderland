@@ -1,10 +1,18 @@
+
 <script setup>
 import { ref, onUnmounted, onMounted } from "vue";
 import emblaCarouselVue from "embla-carousel-vue";
-import { CircleChevronRight } from "lucide-vue-next";
-import { CircleChevronLeft } from "lucide-vue-next";
+import { CircleChevronRight, CircleChevronLeft, PlayCircle, PauseCircle } from "lucide-vue-next";
+import RecordRTC from "recordrtc";
 
 const [emblaRef, emblaApi] = emblaCarouselVue();
+
+const currentAudio = ref(null);
+const recordedAudio = ref({});
+const recorder = ref(null);
+const isRecording = ref(false);
+const currentRecordingText = ref(null);
+const audioController = ref([]);
 
 const storys = ref([
   {
@@ -13,6 +21,7 @@ const storys = ref([
       {
         conversation: null,
         audio: "/audio/Music - page 1 - Kate and Ken Book Intro.mp3",
+        isPlaying: false,
       },
     ],
   },
@@ -22,14 +31,17 @@ const storys = ref([
       {
         conversation: "“Hello, I am Kate.”",
         audio: "/audio/Music - page 2 - Kate melody.mp3",
+        isPlaying: false,
       },
       {
         conversation: "“Hello, I am Ken.”",
         audio: "/audio/Music - page 2 - Ken melody.mp3",
+        isPlaying: false,
       },
       {
         conversation: "“We are good friends.”",
         audio: null,
+        isPlaying: false,
       },
     ],
   },
@@ -40,11 +52,13 @@ const storys = ref([
         conversation: `“We are going for a walk
                     in the woods.”`,
         audio: null,
+        isPlaying: false,
       },
       {
         conversation: `“What a lovely day!” say
                     Kate and Ken.”`,
         audio: "/audio/Music - page 3 - Skipping through the woods.mp3",
+        isPlaying: false,
       },
     ],
   },
@@ -54,20 +68,23 @@ const storys = ref([
       {
         conversation: `“There are three bears who live in a house in the woods. They are”`,
         audio: null,
+        isPlaying: false,
       },
       {
         conversation: `“Papa Bear`,
         audio: "/audio/Music - page 4 - Papa bear melody.mp3",
+        isPlaying: false,
       },
       {
         conversation: `Mama Bear`,
         audio: "/audio/Music - page 4 - Mama bear melody.mp3",
+        isPlaying: false,
       },
       {
         conversation: `and Baby Bear”`,
         audio: "/audio/Music - page 4 - Baby bear melody.mp3",
+        isPlaying: false,
       },
-      
     ],
   },
   {
@@ -80,6 +97,7 @@ const storys = ref([
           ”`,
         audio: "/audio/Music - page 5 - Peas Porriage Hot song recording.mp3",
         speaker: "/icon/listen_speaker.png",
+        isPlaying: false,
       },
     ],
   },
@@ -94,6 +112,7 @@ const storys = ref([
                         he pours the porridge into three bowls to cool.”`,
         audio: "/audio/Music - page 5 - Peas Porriage Hot song.mp3",
         speaker: "/icon/listen_speaker.png",
+        isPlaying: false,
       },
       {
         conversation: `“The three bears take a
@@ -102,62 +121,64 @@ const storys = ref([
           ”`,
         audio: null,
         speaker: null,
+        isPlaying: false,
       },
     ],
   },
 ]);
 
-const currentAudio = ref(null);
-const recordedAudio = ref(null);
-const mediaRecorder = ref(null);
-const audioChunks = ref([]);
-const isRecording = ref(false);
+const playAudio = (text, index) => {
+  audioController.value[index] = new Audio(text.audio);
+  audioController.value[index].play();
+  text.isPlaying = true;
 
-const toggleAudio = (audioSrc) => {
-  if (currentAudio.value && currentAudio.value.src === audioSrc) {
-    currentAudio.value.paused ? currentAudio.value.play() : currentAudio.value.pause();
-  } else {
-    if (currentAudio.value) currentAudio.value.pause();
-    currentAudio.value = new Audio(audioSrc);
-    currentAudio.value.play();
+  audioController.value[index].onended = () => {
+    text.isPlaying = false;
+  };
+};
+
+const pauseAudio = (text, index) => {
+  if (audioController.value[index]) {
+    audioController.value[index].pause();
+    text.isPlaying = false;
   }
 };
 
-const startRecording = () => {
+const startRecording = (textKey) => {
+  if (!recordedAudio.value[textKey]) {
+    recordedAudio.value[textKey] = null;
+  }
+  
   navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-    mediaRecorder.value = new MediaRecorder(stream);
-    mediaRecorder.value.start();
+    recorder.value = new RecordRTC(stream, { type: 'audio' });
+    recorder.value.startRecording();
     isRecording.value = true;
-
-    audioChunks.value = [];
-    mediaRecorder.value.addEventListener("dataavailable", (event) => {
-      audioChunks.value.push(event.data);
-    });
-
-    mediaRecorder.value.addEventListener("stop", () => {
-      const audioBlob = new Blob(audioChunks.value, { type: "audio/ogg; codecs=opus" });
-      recordedAudio.value = URL.createObjectURL(audioBlob);
-      isRecording.value = false;
-    });
+    currentRecordingText.value = textKey;
   });
 };
 
 const stopRecording = () => {
-  if (mediaRecorder.value && mediaRecorder.value.state !== "inactive") {
-    mediaRecorder.value.stop();
+  if (recorder.value) {
+    recorder.value.stopRecording(() => {
+      const blob = recorder.value.getBlob();
+      recordedAudio.value[currentRecordingText.value] = URL.createObjectURL(blob);
+      isRecording.value = false;
+      currentRecordingText.value = null;
+      recorder.value = null;
+    });
   }
 };
 
-const toggleRecordedAudio = () => {
-  if (!recordedAudio.value) return;
+const toggleRecordedAudio = (textKey) => {
+  if (!recordedAudio.value[textKey]) return;
 
-  if (currentAudio.value && currentAudio.value.src !== recordedAudio.value) {
+  if (currentAudio.value && currentAudio.value.src !== recordedAudio.value[textKey]) {
     currentAudio.value.pause();
     currentAudio.value = null;
   }
 
   if (!currentAudio.value) {
-    currentAudio.value = new Audio(recordedAudio.value);
+    currentAudio.value = new Audio(recordedAudio.value[textKey]);
     currentAudio.value.play();
   } else {
     currentAudio.value.paused ? currentAudio.value.play() : currentAudio.value.pause();
@@ -193,7 +214,6 @@ const scrollNext = () => {
   if (emblaApi.value) emblaApi.value.scrollNext();
 };
 </script>
-
 <template>
   <div style="padding: 0;">
     <div class="embla">
@@ -209,7 +229,7 @@ const scrollNext = () => {
                   alt=""
                 />
                 <img
-                v-if="item.page !== 1"
+                  v-if="item.page !== 1"
                   class="image-book"
                   :src="`/img/Kate and Ken Three Bears page${item.page}.png`"
                   alt=""
@@ -217,30 +237,43 @@ const scrollNext = () => {
               </section>
               <section v-if="item.page !== 1" class="text-section">
                 <cite class="conversation">
-                  <p v-for="text in item.texts" :key="text.conversation">
-                    {{ text.conversation }}
-                    <img
-                      v-if="text.audio"
-                      width="30"
-                      src="/icon/listen_speaker.png"
-                      alt="Listen"
-                      @click="toggleAudio(text.audio)"
-                    />
-                    <img
-                      v-if="text.speaker"
-                      width="30"
-                      src="/icon/Icon - microphone.png"
-                      alt="Record"
-                      @mousedown="startRecording"
-                      @mouseup="stopRecording"
-                    />
-                    <img
-                      v-if="recordedAudio"
-                      width="30"
-                      src="/icon/play_recording.png"
-                      alt="Play Recording"
-                      @click="toggleRecordedAudio"
-                    />
+                  <p v-for="(text, index) in item.texts" :key="index" class="text-item">
+                    <span>{{ text.conversation }}</span>
+                    <div class="button-group" :class="{ 'mobile-button-group': isMobile }">
+                      <img
+                        v-if="!text.isPlaying && text.audio"
+                        src="/icon/play_recording.png"
+                        alt="Play"
+                        width="50"
+                        class="icon-button"
+                        @click.stop="playAudio(text, index)"
+                      />
+                      <img
+                        v-if="text.isPlaying && text.audio"
+                        src="/icon/image.webp"
+                        alt="Pause"
+                        width="50"
+                        class="icon-button"
+                        @click.stop="pauseAudio(text, index)"
+                      />
+                      <img
+                        v-if="text.speaker"
+                        width="40"
+                        src="/icon/Icon - microphone.png"
+                        alt="Record"
+                        @mousedown="startRecording(`${item.page}-${index}`)"
+                        @mouseup="stopRecording"
+                        class="icon-button"
+                      />
+                      <img
+                        v-if="recordedAudio && recordedAudio[`${item.page}-${index}`]"
+                        width="40"
+                        src="/icon/listen_speaker.png"
+                        alt="Play Recording"
+                        @click="toggleRecordedAudio(`${item.page}-${index}`)"
+                        class="icon-button"
+                      />
+                    </div>
                   </p>
                 </cite>
               </section>
@@ -313,6 +346,17 @@ body {
   align-items: center;
   object-fit: contain !important;
 }
+.text-item {
+  margin-bottom: 50px;
+}
+.button-group {
+  display: flex;
+  align-items: center;
+}
+.icon-button {
+  margin-left: 5px;
+  cursor: pointer;
+}
 .toggle-button {
   position: fixed;
   bottom: 20px;
@@ -373,11 +417,23 @@ body {
   .conversation {
     font-size: 1.5rem;
   }
+  .text-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .mobile-button-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
   .embla__prev,
   .embla__next {
     padding: 10px;
     top: auto;
-    bottom: 10px;
+    bottom: 50px;
     transform: translateY(0);
   }
   .embla__prev {
