@@ -13,7 +13,7 @@ const recorder = ref(null);
 const isRecording = ref(false);
 const currentRecordingText = ref(null);
 const audioController = ref([]);
-
+const mediaStream = ref(null);
 const storys = ref([
   {
     page: 1,
@@ -151,6 +151,7 @@ const startRecording = (textKey) => {
   
   navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
     recorder.value = new RecordRTC(stream, { type: 'audio' });
+    mediaStream.value = stream;
     recorder.value.startRecording();
     isRecording.value = true;
     currentRecordingText.value = textKey;
@@ -158,6 +159,7 @@ const startRecording = (textKey) => {
 };
 
 const stopRecording = () => {
+  console.log(mediaStream.value)
   if (recorder.value) {
     recorder.value.stopRecording(() => {
       const blob = recorder.value.getBlob();
@@ -166,6 +168,8 @@ const stopRecording = () => {
       currentRecordingText.value = null;
       recorder.value = null;
     });
+    mediaStream.value.getTracks().forEach((track) => track.stop());
+    mediaStream.value = null
   }
 };
 
@@ -223,25 +227,25 @@ const scrollNext = () => {
             <div class="slide-content" :class="{ 'center-content': item.page === 1 }">
               <section class="image-section" :class="{ 'center-image': item.page === 1 }">
                 <img
-                  v-if="item.page === 1"
+                  v-show="item.page === 1"
                   class="image"
                   :src="`/img/Kate and Ken Three Bears page${item.page}.png`"
                   alt=""
                 />
                 <img
-                  v-if="item.page !== 1"
+                  v-show="item.page !== 1"
                   class="image-book"
                   :src="`/img/Kate and Ken Three Bears page${item.page}.png`"
                   alt=""
                 />
               </section>
-              <section v-if="item.page !== 1" class="text-section">
+              <section v-show="item.page !== 1" class="text-section">
                 <cite class="conversation">
-                  <p v-for="(text, index) in item.texts" :key="index" class="text-item">
+                  <div v-for="(text, index) in item.texts" :key="index" class="text-item">
                     <span>{{ text.conversation }}</span>
                     <div class="button-group" :class="{ 'mobile-button-group': isMobile }">
                       <img
-                        v-if="!text.isPlaying && text.audio"
+                        v-show="!text.isPlaying && text.audio"
                         src="/icon/play_recording.png"
                         alt="Play"
                         width="50"
@@ -249,7 +253,7 @@ const scrollNext = () => {
                         @click.stop="playAudio(text, index)"
                       />
                       <img
-                        v-if="text.isPlaying && text.audio"
+                        v-show="text.isPlaying && text.audio"
                         src="/icon/image.webp"
                         alt="Pause"
                         width="50"
@@ -257,7 +261,7 @@ const scrollNext = () => {
                         @click.stop="pauseAudio(text, index)"
                       />
                       <img
-                        v-if="text.speaker"
+                        v-show="text.speaker"
                         width="40"
                         src="/icon/Icon - microphone.png"
                         alt="Record"
@@ -266,7 +270,7 @@ const scrollNext = () => {
                         class="icon-button"
                       />
                       <img
-                        v-if="recordedAudio && recordedAudio[`${item.page}-${index}`]"
+                        v-show="recordedAudio && recordedAudio[`${item.page}-${index}`]"
                         width="40"
                         src="/icon/listen_speaker.png"
                         alt="Play Recording"
@@ -274,7 +278,7 @@ const scrollNext = () => {
                         class="icon-button"
                       />
                     </div>
-                  </p>
+                  </div>
                 </cite>
               </section>
             </div>
@@ -284,7 +288,7 @@ const scrollNext = () => {
       <button class="embla__prev" @click="scrollPrev"><CircleChevronLeft /></button>
       <button class="embla__next" @click="scrollNext"><CircleChevronRight /></button>
     </div>
-    <div v-if="isRecording" class="recording-indicator">
+    <div v-show="isRecording" class="recording-indicator">
       Recording...
       <button @click="stopRecording" class="toggle-button">Stop Recording</button>
     </div>
