@@ -265,8 +265,7 @@ const scrollNext = () => {
                         width="40"
                         src="/icon/Icon - microphone.png"
                         alt="Record"
-                        @mousedown="startRecording(`${item.page}-${index}`)"
-                        @mouseup="stopRecording"
+                        @click="startRecording(`${item.page}-${index}`)"
                         class="icon-button"
                       />
                       <img
